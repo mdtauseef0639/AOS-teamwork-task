@@ -10,7 +10,10 @@ import FormControl from "@mui/material/FormControl";
 
 import TextareaAutosize from "@mui/material/TextareaAutosize"
 
-export default function Form() {
+export default function Form(props) {
+
+
+  const {name,team,taskDate,Status,Priority} = props
   
  const [teamValue,setTeamValue] = useState();
  const [priorityValue,setPriorityValue] = useState();
@@ -21,18 +24,18 @@ export default function Form() {
  const [priorityInputValue,setPriorityInputValue] = useState();
  const [statusInputValue,setStatusInputValue] = useState();
  const [assignInputValue,setAssignInputValue] = useState()
+
+ const [inputDesc,setInputDesc] = useState();
+ const [desc,setDesc] = useState();
 const d = new Date()
 const today = d.getFullYear() + "-" + "0"+ d.getMonth() + "-" + d.getDate()
-console.log(today)
  const [add,setAdd] = useState(false)
 const [save,setSave] = useState(false)
  const handleAdd=()=>{
      setAdd(true)
  }
 
- const handleSave=()=>{
-   setSave(true)
- }
+ 
 
 
   const [inputDetails, setInputDetails] = useState({ name: "", sdate: "",deadline:"",taskDuration:"" });
@@ -45,9 +48,43 @@ const [save,setSave] = useState(false)
   const teams = ["General", "IDF-Exp", "North" ,"South"];
   const priority = ["Low", "Normal", "High" , "Urgent"];
   const status = ["New", "In Progress", "Closed" ,"Cancelled"];
+
+
+  const handleSave=()=>{
+    setSave(true)
+
+    if(inputDetails.name==="" ||inputDetails.name=== null )
+    {
+
+    }
+    else{
+       fetch(
+      "http://localhost:3000/axelor-erp/ws/rest/com.axelor.team.db.TeamTask",
+      {
+       credentials: "include",
+       method:"POST",
+        mode: "cors",
+        headers: {
+          "Accept": "application/json",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Methods": "*",
+          "Content-Type": "application/json",
+          "X-Request-With": "XMLHttpRequest",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+          "X-CSRF-Token": "0779fdf4-0894-4952-b016-7c4b81d69f4c",
+        },
+        body:JSON.stringify({data:{
+          name:inputDetails.name,team:teamInputValue,taskDate:inputDetails.sdate,status:statusInputValue,priority:priorityInputValue,taskDeadline:inputDetails.deadline,taskDuration:inputDetails.taskDuration,description:desc
+        }})
+      }
+    ) 
+    }
+
+
+  }
   return (
     <>
-    <Button variant="text"><AddIcon style={{color:"black"}} onClick={handleAdd}/></Button>
     <Button variant="text"><SaveIcon style={{color:"black"}} onClick={handleSave}/></Button>
     <form action="" method="post" className="form">
       <FormControl error variant="standard">
@@ -59,6 +96,7 @@ const [save,setSave] = useState(false)
           style={{ height: "16px" }}
           onChange={handleChange}
           name="name"
+          value={name}
         />
       </FormControl>
       <FormControl className="teamInput" variant="standard">
@@ -71,7 +109,7 @@ const [save,setSave] = useState(false)
           size={"500px"}
           options={teams}
           name="team"
-          value={teamInputValue}
+          value={teamInputValue||team}
         onChange={(event, newValue) => {
           setTeamValue(newValue);
         }}
@@ -92,7 +130,7 @@ const [save,setSave] = useState(false)
         className="auto"
           id="tags-standard"
           options={priority}
-          value={priorityInputValue}
+          value={priorityInputValue || Priority}
         onChange={(event, newValue) => {
           setPriorityValue(newValue);
         }}
@@ -115,7 +153,7 @@ const [save,setSave] = useState(false)
         className="auto"
           id="tags-standard status "
           options={status}
-          value={statusInputValue}
+          value={statusInputValue || Status}
         onChange={(event, newValue) => {
           setStatusValue(newValue);
         }}
@@ -133,7 +171,7 @@ const [save,setSave] = useState(false)
       <FormLabel htmlFor="sdate">
           State date
         </FormLabel>
-        <Input type="date" onChange={handleChange} value={today} name="sdate" style={{ height: "16px",paddingBottom:"10px" }} defaultValue={new Date().getDate()}></Input>
+        <Input type="date" onChange={handleChange} value={today || taskDate} name="sdate" style={{ height: "16px",paddingBottom:"10px" }} defaultValue={new Date().getDate()}></Input>
       </FormControl>
       <FormControl>
       <FormLabel htmlFor="deadline" >
@@ -171,7 +209,14 @@ const [save,setSave] = useState(false)
         />
       </FormControl>
       <FormLabel>Description</FormLabel>
-      <TextareaAutosize className="text-area" style={{height:"300px"}}>
+      <TextareaAutosize className="text-area" style={{height:"300px"}}  onChange={(event, newValue) => {
+          setDesc(newValue);
+        }}
+       
+        
+        onInputChange={(event, newInputValue) => {
+          setInputDesc(newInputValue);
+        }}>
           
       </TextareaAutosize>
     </form>
