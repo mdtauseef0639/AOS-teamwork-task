@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Button, Container } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
+import { Button} from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CachedIcon from '@mui/icons-material/Cached';
 
 
+
 import EditIcon from '@mui/icons-material/Edit';
-const axios = require('axios').default;
+import service from "../service";
+
 
 
 const columns = [
@@ -43,86 +44,29 @@ const columns = [
   },
 ];
 
-const rows = [
-  {
-    id: 1,
-    name: "Pizza order",
-    team: "",
-    taskDate: "11/04/2022",
-    status: "New",
-    priority: "",
-  },
-  {
-    id: 2,
-    name: "Pizza order",
-    team: "",
-    taskDate: "18/04/2022",
-    status: "New",
-    priority: "",
-  },
-  {
-    id: 3,
-    name: "Pizza order",
-    team: "",
-    taskDate: "20/04/2022",
-    status: "New",
-    priority: "",
-  },
-  {
-    id: 4,
-    name: "Pizza order",
-    team: "",
-    taskDate: "20/04/2022",
-    status: "New",
-    priority: "",
-  },
-];
 
-export default function Task(onEdit) {
+
+export default function Task({editData,handleEdit}) {
   const [data, setData] = useState([]);
   const [entryClicked,setEntryClicked] = useState(false);
-  const [clickedId,setClickedId] = useState();
+  const [clickedData,setClickedData] = useState();
 
   const handleDoubleClick = (e) =>{
     setEntryClicked(true)
-    console.log(e.id)
-  }
-  const handleEdit=()=>{
-
-  }
+  } 
 
   
 
   const handleClick=(e)=>{
     setEntryClicked(true)
-    setClickedId(e.id)
+    setClickedData(e)
   }
 
   const handleDelete=()=>{
-    fetch(
-      "http://localhost:3000/axelor-erp/ws/rest/com.axelor.team.db.TeamTask/removeAll",
-      {
-       credentials: "include",
-       method:"POST",
-        mode: "cors",
-        headers: {
-          "Accept": "application/json",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Methods": "*",
-          "Content-Type": "application/json",
-          "X-Request-With": "XMLHttpRequest",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-          "X-CSRF-Token": "0779fdf4-0894-4952-b016-7c4b81d69f4c",
-        },
-        body:JSON.stringify({records:[{id:clickedId}]})
-      }
-    )
+    const url = "ws/rest/com.axelor.team.db.TeamTask/removeAll"
+    const body = {records:[{id:clickedData.id}]}
+    service.post(url,body)
   }
-
- 
-
-  
 
   const rows = data.map((x)=>{
     if(x.team===null)
@@ -137,66 +81,32 @@ export default function Task(onEdit) {
   // console.log(rows)
   const handleReload=()=>{
     setEntryClicked(false)
-    fetch(
-      "http://localhost:3000/axelor-erp/ws/rest/com.axelor.team.db.TeamTask/search",
-      {
-       credentials: "include",
-       method:"POST",
-        mode: "cors",
-        headers: {
-          "Accept": "application/json",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Methods": "*",
-          "Content-Type": "application/json",
-          "X-Request-With": "XMLHttpRequest",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-          "X-CSRF-Token": "0779fdf4-0894-4952-b016-7c4b81d69f4c",
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data.data)
-      })
+    const url = "ws/rest/com.axelor.team.db.TeamTask/search"
+    service.post(url).then(data=>{
+      setData(data.data)
+    })
+    
   }
   useEffect(() => {
-    // GET request using fetch inside useEffect React hook
-     fetch(
-      "http://localhost:3000/axelor-erp/ws/rest/com.axelor.team.db.TeamTask/search",
-      {
-       credentials: "include",
-       method:"POST",
-        mode: "cors",
-        headers: {
-          "Accept": "application/json",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Methods": "*",
-          "Content-Type": "application/json",
-          "X-Request-With": "XMLHttpRequest",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-          "X-CSRF-Token": "0779fdf4-0894-4952-b016-7c4b81d69f4c",
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
+      const url = "ws/rest/com.axelor.team.db.TeamTask/search"
+      service.post(url).then(data=>{
         setData(data.data)
       })
 
   }, []);
+ 
 
   useEffect(()=>{
-    
-  },[data])
+    handleReload()
+  },[])
   
   return (
     <>
     
       
       <Button disabled={!entryClicked} variant="text"><DeleteIcon  style={entryClicked?{color:"black"}:{color:"silver"}} onClick={handleDelete} /></Button>
-      <Button variant="text" disabled={!entryClicked}><EditIcon style={entryClicked?{color:"black"}:{color:"silver"}} onClick={()=>{onEdit()}} /></Button>
+      <Button variant="text" disabled={!entryClicked}><EditIcon style={entryClicked?{color:"black"}:{color:"silver"}} onClick={()=>{editData(clickedData)
+      handleEdit(entryClicked)}} /></Button>
       <Button variant="text"><CachedIcon  style={{color:"black"}} onClick={handleReload} /></Button>
       
     <div style={{ height: 400, width: "100%" }}>
