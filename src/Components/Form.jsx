@@ -6,16 +6,14 @@ import TextField from "@mui/material/TextField";
 import SaveIcon from "@mui/icons-material/Save";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Task from "./Task";
 
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import service from "../service";
 import { useEffect } from "react";
 
-
 export default function Form(props) {
-  const [add,setAdd] = useState(false)
   const { data } = props;
   const [back, setBack] = useState(false);
   const [editData, setEditData] = useState({ id: 0, version: 0 });
@@ -44,11 +42,11 @@ export default function Form(props) {
 
   const teams = ["North", "South", "IDF-EXP", "General"];
   const code = ["NTH", "STH", "EXP", "GNL"];
-  const priority = ["","low", "normal", "high", "urgent"];
+  const priority = ["low", "normal", "high", "urgent"];
   const priorityLabel = ["Low", "Normal", "High", "Urgent"];
-  const status = ["","new", "in-progress", "closed", "canceled"];
+  const status = ["new", "in-progress", "closed", "canceled"];
   const statusLabel = ["New", "In Progress", "Closed", "Canceled"];
- 
+
   const handleSave = () => {
     if (inputDetails.name === "" || inputDetails.name === null) {
     } else {
@@ -65,48 +63,48 @@ export default function Form(props) {
       const details = {
         ...inputDetails,
         ...autoDetails,
-      }
-      
+      };
+
       if (props.edit) {
         const body = {
           data: { ...details, id: editData.id, version: editData.version },
         };
         service.post(url, body);
       } else {
-        const body = { data:{...details}};
+        const body = { data: { ...details } };
         service.post(url, body);
       }
     }
-
-    
   };
   const handleUpdate = () => {
     const fetchUrl =
       "ws/rest/com.axelor.team.db.TeamTask/" + props.editId + "/fetch";
-    service.post(fetchUrl).then((data) => {
-      setEditData({ id: data.data[0].id, version: data.data[0].version });
-    });
+    if (props.edit) {
+      service.post(fetchUrl).then((data) => {
+        setEditData({ id: data.data[0].id, version: data.data[0].version });
+      });
+    }
   };
   useEffect(() => {
     handleUpdate();
-  },[]);
+  }, []);
 
-  const handleBack=()=>{
+  const handleBack = () => {
     setBack(true);
-  }
+  };
   return (
     <>
       {back ? (
-        <Task handleAdd={props.handleAdd}/>
+        <Task handleAdd={props.handleAdd} />
       ) : (
         <div className="form-conatiner">
-        <div className="form-button-container">
-        <Button  variant="text">
-        <ArrowBackIcon style={{ color: "black" }} onClick={handleBack}/>
-        </Button>
-          <Button variant="text">
-            <SaveIcon style={{ color: "black" }} onClick={handleSave} />
-          </Button>
+          <div className="form-button-container">
+            <Button variant="text">
+              <ArrowBackIcon style={{ color: "black" }} onClick={handleBack} />
+            </Button>
+            <Button variant="text">
+              <SaveIcon style={{ color: "black" }} onClick={handleSave} />
+            </Button>
           </div>
           <form action="" method="post" className="form">
             <FormControl error variant="standard">
@@ -128,7 +126,6 @@ export default function Form(props) {
                 id="size-small-standard"
                 size={"500px"}
                 options={teams}
-                
                 name="team"
                 value={inputAutoDetails.team}
                 onChange={(event, newValue) => {
@@ -152,7 +149,13 @@ export default function Form(props) {
                 id="tags-standard"
                 options={priority}
                 value={inputAutoDetails.priority}
-                getOptionLabel={(options)=>priorityLabel[priority.indexOf(options)]}
+                getOptionLabel={(option) =>
+                  typeof priorityLabel[priority.indexOf(option)] === "string" ||
+                  priorityLabel[priority.indexOf(option)] instanceof String
+                    ? priorityLabel[priority.indexOf(option)]
+                    : "Normal"
+                }
+                // priorityLabel[priority.indexOf(option)]
                 onChange={(event, newValue) => {
                   setInputAutoDetails((x) => {
                     return { ...x, priority: newValue };
@@ -170,19 +173,19 @@ export default function Form(props) {
                 id="tags-standard status"
                 options={status}
                 value={inputAutoDetails.status}
-                getOptionLabel={option=>statusLabel[status.indexOf(option)]}
+                getOptionLabel={(option) =>
+                  typeof statusLabel[status.indexOf(option)] === "string" ||
+                  statusLabel[status.indexOf(option)] instanceof String
+                    ? statusLabel[status.indexOf(option)]
+                    : "New"
+                }
                 onChange={(event, newValue) => {
                   setInputAutoDetails((x) => {
                     return { ...x, status: newValue };
                   });
                 }}
-              
                 renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    
-                  />
+                  <TextField {...params} variant="standard" />
                 )}
               />
             </FormControl>
@@ -194,7 +197,6 @@ export default function Form(props) {
                 value={inputDetails.taskDate}
                 name="sdate"
                 style={{ height: "16px", paddingBottom: "10px" }}
-                defaultValue={new Date().getDate()}
               ></Input>
             </FormControl>
             <FormControl>
@@ -241,11 +243,9 @@ export default function Form(props) {
             </FormControl>
             <FormLabel>Description</FormLabel>
 
-            
             <TextareaAutosize
               className="text-area"
-              style={{ height: "300px"}}
-
+              style={{ height: "300px" }}
               onChange={(event, newValue) => {
                 setInputAutoDetails((x) => {
                   return { ...x, desc: newValue };
