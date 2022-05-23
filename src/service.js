@@ -44,7 +44,7 @@ export class Service {
     headers.append("Access-Control-Allow-Methods","*")
     headers.append("Access-Control-Allow-Credentials",true)
     headers.append("Access-Control-Allow-Origin","*")
-    headers.append("X-CSRF-Token","e87491d6-974d-4411-845c-f6c71d1d3d37");
+    headers.append("X-CSRF-Token","17305144-74e7-4f24-8b67-b6c55025a618");
     // readCookie("CSRF-TOKEN")
     this.baseURL = process.env.NODE_ENV === "production" ? ".." : "axelor-erp";
     this.headers = headers;

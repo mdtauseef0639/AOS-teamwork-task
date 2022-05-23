@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import SaveIcon from "@mui/icons-material/Save";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Task from "./Task";
 
 import TextareaAutosize from "@mui/material/TextareaAutosize";
@@ -14,8 +15,9 @@ import { useEffect } from "react";
 
 
 export default function Form(props) {
+  const [add,setAdd] = useState(false)
   const { data } = props;
-  const [save, setSave] = useState(false);
+  const [back, setBack] = useState(false);
   const [editData, setEditData] = useState({ id: 0, version: 0 });
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
@@ -27,7 +29,7 @@ export default function Form(props) {
     taskDuration: data?.taskDuration || "",
   });
   const [inputAutoDetails, setInputAutoDetails] = useState({
-    team: data?.team,
+    team: data?.team || "",
     priority: data?.priority || "",
     status: data?.status || "",
     assign: data?.assign || "",
@@ -42,9 +44,11 @@ export default function Form(props) {
 
   const teams = ["North", "South", "IDF-EXP", "General"];
   const code = ["NTH", "STH", "EXP", "GNL"];
-  const priority = ["Low", "Normal", "High", "Urgent"];
-  const status = ["New", "In Progress", "Closed", "Cancelled"];
-
+  const priority = ["","low", "normal", "high", "urgent"];
+  const priorityLabel = ["Low", "Normal", "High", "Urgent"];
+  const status = ["","new", "in-progress", "closed", "canceled"];
+  const statusLabel = ["New", "In Progress", "Closed", "Canceled"];
+ 
   const handleSave = () => {
     if (inputDetails.name === "" || inputDetails.name === null) {
     } else {
@@ -61,19 +65,20 @@ export default function Form(props) {
       const details = {
         ...inputDetails,
         ...autoDetails,
-      };
+      }
+      
       if (props.edit) {
         const body = {
           data: { ...details, id: editData.id, version: editData.version },
         };
         service.post(url, body);
       } else {
-        const body = { data: details };
+        const body = { data:{...details}};
         service.post(url, body);
       }
     }
 
-    setSave(true);
+    
   };
   const handleUpdate = () => {
     const fetchUrl =
@@ -86,15 +91,23 @@ export default function Form(props) {
     handleUpdate();
   },[]);
 
+  const handleBack=()=>{
+    setBack(true);
+  }
   return (
     <>
-      {save ? (
-        <Task />
+      {back ? (
+        <Task handleAdd={props.handleAdd}/>
       ) : (
-        <>
+        <div className="form-conatiner">
+        <div className="form-button-container">
+        <Button  variant="text">
+        <ArrowBackIcon style={{ color: "black" }} onClick={handleBack}/>
+        </Button>
           <Button variant="text">
             <SaveIcon style={{ color: "black" }} onClick={handleSave} />
           </Button>
+          </div>
           <form action="" method="post" className="form">
             <FormControl error variant="standard">
               <FormLabel htmlFor="component-error" id="name-label">
@@ -115,6 +128,7 @@ export default function Form(props) {
                 id="size-small-standard"
                 size={"500px"}
                 options={teams}
+                
                 name="team"
                 value={inputAutoDetails.team}
                 onChange={(event, newValue) => {
@@ -138,6 +152,7 @@ export default function Form(props) {
                 id="tags-standard"
                 options={priority}
                 value={inputAutoDetails.priority}
+                getOptionLabel={(options)=>priorityLabel[priority.indexOf(options)]}
                 onChange={(event, newValue) => {
                   setInputAutoDetails((x) => {
                     return { ...x, priority: newValue };
@@ -152,20 +167,21 @@ export default function Form(props) {
               <FormLabel htmlFor="status">Status</FormLabel>
               <Autocomplete
                 className="auto"
-                id="tags-standard status "
+                id="tags-standard status"
                 options={status}
                 value={inputAutoDetails.status}
+                getOptionLabel={option=>statusLabel[status.indexOf(option)]}
                 onChange={(event, newValue) => {
                   setInputAutoDetails((x) => {
                     return { ...x, status: newValue };
                   });
                 }}
-                defaultValue="New"
+              
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     variant="standard"
-                    placeholder="Favorites"
+                    
                   />
                 )}
               />
@@ -224,9 +240,12 @@ export default function Form(props) {
               />
             </FormControl>
             <FormLabel>Description</FormLabel>
+
+            
             <TextareaAutosize
               className="text-area"
-              style={{ height: "300px" }}
+              style={{ height: "300px"}}
+
               onChange={(event, newValue) => {
                 setInputAutoDetails((x) => {
                   return { ...x, desc: newValue };
@@ -234,7 +253,7 @@ export default function Form(props) {
               }}
             ></TextareaAutosize>
           </form>
-        </>
+        </div>
       )}
     </>
   );

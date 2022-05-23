@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Button} from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import CachedIcon from '@mui/icons-material/Cached';
-
-
-
-import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from "@mui/icons-material/Add";
+import  MLink    from "@mui/material/Link";
+import { Link, Router } from "react-router-dom";
 import service from "../service";
+import Form from "./Form";
+
+
+
+
+
+
+
+
+// import taskContext from "../contexts/taskContext"
 
 
 
@@ -46,16 +54,24 @@ const columns = [
 
 
 
-export default function Task({editData,handleEdit}) {
+export default function Task({editData,handleEdit,handleAdd}) {
   const [data, setData] = useState([]);
   const [entryClicked,setEntryClicked] = useState(false);
   const [clickedData,setClickedData] = useState();
+  const [refresh,setRefresh] = useState(0)
+
+
+  
 
   const handleDoubleClick = (e) =>{
     setEntryClicked(true)
+    editData(clickedData)
+      handleEdit(entryClicked)
+    // setState(prev=>{
+    //   return{...prev,data:clickedData,edit:entryClicked}
+    // })
   } 
-
-  
+  // console.log("state:",state.edit)
 
   const handleClick=(e)=>{
     setEntryClicked(true)
@@ -66,12 +82,15 @@ export default function Task({editData,handleEdit}) {
     const url = "ws/rest/com.axelor.team.db.TeamTask/removeAll"
     const body = {records:[{id:clickedData.id}]}
     service.post(url,body)
-  }
+    setRefresh(refresh+1)
+
+    }
+  console.log("editData:",editData,"handleEdit:",handleEdit,"handleAdd:",handleAdd)
 
   const rows = data.map((x)=>{
-    if(x.team===null)
-    return{id:x.id,name:x.name,team:"",taskDate:x.taskDate,status:x.status,priority:x.priority}
-    else
+    // if(x.team===null)
+    // return{id:x.id,name:x.name,team:"",taskDate:x.taskDate,status:x.status,priority:x.priority}
+    // else
   return{id:x.id,name:x.name,team:x.team.name,taskDate:x.taskDate,status:x.status,priority:x.priority}
   })
   
@@ -79,37 +98,34 @@ export default function Task({editData,handleEdit}) {
   //   return{id:index,name:data[index].name,team:data.team.name}
   // })
   // console.log(rows)
-  const handleReload=()=>{
-    setEntryClicked(false)
-    const url = "ws/rest/com.axelor.team.db.TeamTask/search"
-    service.post(url).then(data=>{
-      setData(data.data)
-    })
-    
-  }
+ 
   useEffect(() => {
       const url = "ws/rest/com.axelor.team.db.TeamTask/search"
       service.post(url).then(data=>{
         setData(data.data)
       })
 
-  }, []);
+  }, [])
  
+  useEffect(() => {
+    const url = "ws/rest/com.axelor.team.db.TeamTask/search"
+    service.post(url).then(data=>{
+      setData(data.data)
+    })
 
-  useEffect(()=>{
-    handleReload()
-  },[])
-  
+}, [refresh])
   return (
-    <>
+    <div className="task-container">
     
+      <div className="task-button-container">
+       
+      <Button><AddIcon style={{color:"black"}} onClick={()=>{handleAdd(true)}}/></Button>
+      
       
       <Button disabled={!entryClicked} variant="text"><DeleteIcon  style={entryClicked?{color:"black"}:{color:"silver"}} onClick={handleDelete} /></Button>
-      <Button variant="text" disabled={!entryClicked}><EditIcon style={entryClicked?{color:"black"}:{color:"silver"}} onClick={()=>{editData(clickedData)
-      handleEdit(entryClicked)}} /></Button>
-      <Button variant="text"><CachedIcon  style={{color:"black"}} onClick={handleReload} /></Button>
+      </div>
       
-    <div style={{ height: 400, width: "100%" }}>
+    <div style={{ height: "50em", width: "48em" }}>
       <DataGrid
         className="data-grid"
         sx={{
@@ -119,7 +135,7 @@ export default function Task({editData,handleEdit}) {
             },
         }}
         editMode=""
-        rows={rows}
+        rows={""|| rows }
         onRowDoubleClick={handleDoubleClick}
         onRowClick={handleClick}
         columns={columns}
@@ -127,7 +143,8 @@ export default function Task({editData,handleEdit}) {
         rowsPerPageOptions={[5]}
       />
     </div>
-    </>
+    
+    </div>
     
   );
 }

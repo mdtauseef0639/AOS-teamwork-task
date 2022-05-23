@@ -1,10 +1,7 @@
 import React, { useState } from 'react'
 import Task from './Task'
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from "@mui/icons-material/Edit"
 import Form from './Form';
-import { Container } from '@mui/material';
+
  
 
 export default function App() {
@@ -26,9 +23,9 @@ export default function App() {
     }
   
   return (
-    <Container fluid="true">
-      <Button variant="text"><AddIcon style={{color:"black"}} onClick={handleAdd}/></Button>
-        {edit?(<Form data={data} edit={edit} editId={data.id}/> ):(add?(<Form/>):(<Task editData={editData} handleEdit={handleEdit}/>))}
-    </Container>
+    <div className='Container'>
+      
+        {edit?(<Form data={data} edit={edit} editId={data.id} handleAdd={handleAdd}/> ):(add?(<Form/>):(<Task editData={editData} handleEdit={handleEdit} handleAdd={handleAdd}/>))}
+    </div>
   )
 }
