@@ -51,10 +51,7 @@ const assignId = assignData.map((x,i,assign)=>{
 
 
   const [inputDetails, setInputDetails] = useState({
-    name: getData?.name|| "",
-    taskDate:getData?.taskDate || today,
-    taskDeadline:getData?.taskDeadline || null,
-    taskDuration:getData?.taskDuration || null,
+
   });
   const [inputAutoDetails, setInputAutoDetails] = useState({
     team: getData?.team||"",
@@ -219,7 +216,7 @@ useEffect(()=>{
                 style={{ height: "16px" }}
                 onChange={handleChange}
                 name="name"
-                value={inputDetails.name}
+                value={inputDetails.name||getData?.name}
               />
             </FormControl>
             <FormControl className="teamInput" variant="standard">
@@ -301,7 +298,7 @@ useEffect(()=>{
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDate}
+                value={inputDetails.taskDate|| getData?.taskDate || today}
                 name="taskDate"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -311,7 +308,7 @@ useEffect(()=>{
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDeadline}
+                value={inputDetails.taskDeadline || getData?.taskDeadline || null}
                 name="taskDeadline"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -321,6 +318,7 @@ useEffect(()=>{
               <Input
                 type="number"
                 onChange={handleChange}
+                value={inputDetails.taskDuration || getData?.taskDuration || null}
                 name="taskDuration"
                 style={{ height: "16px" }}
               ></Input>
