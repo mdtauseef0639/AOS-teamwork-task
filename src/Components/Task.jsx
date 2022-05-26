@@ -6,11 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import service from "../service";
 import Form from "./Form";
 
-export const MyContext = React.createContext({
-  edit: true,
-  add: true,
-  data: {},
-});
+
 
 const columns = [
   {
@@ -57,11 +53,22 @@ export default function Task() {
   const handleDoubleClick = (e) => {
     setEntryClicked(true);
     setEdit(true);
-    setClickedData(e["row"]);
+    const url = "/ws/rest/com.axelor.team.db.TeamTask/"+e["row"].id+"/fetch";
+    service.post(url).then((data) => {
+      const fetchData = data.data[0]
+      
+      
+          setClickedData({...fetchData,team:fetchData.team?fetchData.team.name:"",assignedTo:fetchData.assignedTo?fetchData.assignedTo.fullName:""})
+    });
   };
+ 
+
+ 
+  
 
   const handleClick = (e) => {
     setEntryClicked(true);
+    
     setClickedData(e);
   };
 
@@ -72,20 +79,34 @@ export default function Task() {
     setRefresh(refresh + 1);
   };
 
-  const rows = data.map((x) => {
-    return {
-      id: x.id,
-      name: x.name,
-      team: x.team.name,
-      taskDate: x.taskDate,
-      status: x.status,
-      priority: x.priority,
-    };
+  const rows = (data|| []).map((x) => {
+    if(x.team===null)
+    {
+      return {
+        id: x.id,
+        name: x.name,
+        team: "",
+        taskDate: x.taskDate,
+        status: x.status,
+        priority: x.priority,
+      }
+    }
+    else{
+      return {
+        id: x.id,
+        name: x.name,
+        team: x.team.name,
+        taskDate: x.taskDate,
+        status: x.status,
+        priority: x.priority,
+      }
+    }
   });
 
   useEffect(() => {
     const url = "ws/rest/com.axelor.team.db.TeamTask/search";
     service.post(url).then((data) => {
+
       setData(data.data);
     });
   }, []);
@@ -99,7 +120,7 @@ export default function Task() {
   return add ? (
     <Form />
   ) : edit ? (
-    <Form data={clickedData} edit={entryClicked} editId={clickedData.id} />
+    <Form getData={clickedData} edit={entryClicked} editId={clickedData.id} />
   ) : (
     <div className="task-container">
       <div className="task-button-container">
@@ -128,13 +149,15 @@ export default function Task() {
               {
                 display: "none",
               },
+              
           }}
-          rows={"" || rows}
+          rows={rows|| [""]}
           onRowDoubleClick={handleDoubleClick}
           onRowClick={handleClick}
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5]}
+          multipleSelection={true}
         />
       </div>
     </div>
