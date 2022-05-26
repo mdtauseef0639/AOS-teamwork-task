@@ -9,6 +9,12 @@
 {code: "suppmg", partner: {fullName: "MAURIN David", id: 62, $version: 3}, name: "David MAURIN"},
 {code: "demo", partner: {fullName: "P0068 - Demo", id: 68, $version: 2}, name: "Demo"}]
 
+const assignTo = assignData.map((x)=>{
+  return {code:x.code,fullName:x.name,id:x.partner.id}
+})
+
+console.log(assignTo)
+
 const teamsData =[
     {
       code:"NTH",
@@ -35,24 +41,12 @@ const teamsData =[
     }
     
   ]
-
-  const teamsName = teamsData.map((x,i,team)=>{
-    return team[i].name
-  })
   
-  const team =(x)=>{
-    return {
-      
-        id: teamsData[teamsName.indexOf(x)].id,
-        name: x,
-        code: teamsData[teamsName.indexOf(x)].code
-      
-    }
-  }
+ 
 
   const priority = ["low", "normal", "high", "urgent"];
   const priorityLabel = ["Low", "Normal", "High", "Urgent"];
   const status = ["new", "in-progress", "closed", "canceled"];
   const statusLabel = ["New", "In Progress", "Closed", "Canceled"];
 
-export  {assignData,team,teamsData,priority,priorityLabel,status,statusLabel}
+export  {assignData,assignTo,teamsData,priority,priorityLabel,status,statusLabel}

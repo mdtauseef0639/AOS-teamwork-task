@@ -54,18 +54,19 @@ export default function Task() {
     setEntryClicked(true);
     setEdit(true);
     const url = "/ws/rest/com.axelor.team.db.TeamTask/"+e["row"].id+"/fetch";
-    service.post(url).then((data) => {
-      const fetchData = data.data[0]
-      
-      
-          setClickedData({...fetchData,team:fetchData.team?fetchData.team.name:"",assignedTo:fetchData.assignedTo?fetchData.assignedTo.fullName:""})
-    });
+    getEditData(url)
   };
  
 
- 
+ const getEditData = (url)=>{
+    service.post(url).then((data) => {
+      const fetchData = data.data[0]
+    
+      setClickedData(fetchData)
+    });
+ }
   
-
+console.log(clickedData)
   const handleClick = (e) => {
     setEntryClicked(true);
     
@@ -120,7 +121,7 @@ export default function Task() {
   return add ? (
     <Form />
   ) : edit ? (
-    <Form getData={clickedData} edit={entryClicked} editId={clickedData.id} />
+    <Form getData={clickedData} edit={entryClicked} editId={clickedData.id} getEditData={getEditData} />
   ) : (
     <div className="task-container">
       <div className="task-button-container">

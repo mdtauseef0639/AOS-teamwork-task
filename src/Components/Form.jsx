@@ -13,10 +13,11 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import service from "../service";
 import { useEffect } from "react";
 
-import {assignData,teamsData,priority,priorityLabel,status,statusLabel} from "../../src/test"
+import {assignTo,assignData,teamsData,priority,priorityLabel,status,statusLabel} from "../../src/test"
 
 export default function Form(props) {
-  const { getData } = props;
+  const { getData,getEditData } = props;
+
   
   
 // const editData = {
@@ -51,14 +52,12 @@ const assignId = assignData.map((x,i,assign)=>{
 
 
   const [inputDetails, setInputDetails] = useState({
-
+    
   });
   const [inputAutoDetails, setInputAutoDetails] = useState({
-    team: getData?.team||"",
-    priority: getData?.priority || "normal",
-    status: getData?.status || "new",
-    assignedTo: getData?.assignedTo|| "",
-    description: getData?.description || "",
+    // team: getData?.team||"",
+    // priority: getData?.priority || "normal",
+    
   });
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,45 +74,20 @@ const teamsName = teamsData.map((x,i,team)=>{
 })
 
   const handleSave = () => {
-    var autoDetails={}
+    
     if (!inputDetails.name) {
     } else {
       
       const url = "/ws/rest/com.axelor.team.db.TeamTask";
-      if(inputAutoDetails.team===""){
-        delete inputAutoDetails.team
-      }
-      else if(inputAutoDetails.assignedTo==="")
-      {
-        delete inputAutoDetails.assignedTo
-      }
-     else if(inputAutoDetails.description==="")
-     {
-       autoDetails={...inputAutoDetails,description:null}
-     }
-      else{
-        
-         autoDetails = {
-          ...inputAutoDetails,
-          team: {
-            id: teamsData[teamsName.indexOf(inputAutoDetails.team)].id,
-            name: inputAutoDetails.team,
-            code: teamsData[teamsName.indexOf(inputAutoDetails.team)].code
-          },
-        assignedTo:{
-          id:assignId[assignOption.indexOf(inputAutoDetails.assignedTo)],
-          fullName:inputAutoDetails.assignedTo,
-          code:assignCode[assignOption.indexOf(inputAutoDetails.assignedTo)]
-        }}
-        
-      }
-      console.log(autoDetails)
+      
+     
+     
+      
       
       let details = {
         ...inputDetails,
-        ...autoDetails,
       };
-
+console.log(inputDetails)
       if(details.taskDuration==="")
       {
         details={
@@ -134,8 +108,7 @@ const teamsName = teamsData.map((x,i,team)=>{
       }
       
       if (getData) {
-        // console.log("getData:",getData)
-        // console.log("details:",details)  
+         
         const updatedValue={}
         Object.entries(details).filter((x,i)=>{
           return x[1]!==getData[x[0]]
@@ -143,22 +116,24 @@ const teamsName = teamsData.map((x,i,team)=>{
           (x,i)=>{
               updatedValue[x[0]]=x[1]
           })
-
           
-          
-         
-          
-
         const body = {
           data: { ...getData,...updatedValue},
         };
-        service.post(url, body);
+        const fetchUrl = "/ws/rest/com.axelor.team.db.TeamTask/"+getData.id+"/fetch";
+        service.post(url, body).then(
+          getEditData(fetchUrl)
+          
+        );
+        
       } else {
         const body = { data: { ...details } };
-        service.post(url, body);
+        service.post(url, body).then(
+          (data)=>{
+            console.log(data)
+          }
+        );
       }
-      
-      
       
     }
    
@@ -166,32 +141,27 @@ const teamsName = teamsData.map((x,i,team)=>{
 
   
   
-useEffect(()=>{
-  setInputDetails(
-    {
-      name: getData?.name|| "",
-      taskDate:getData?.taskDate || today,
-      taskDeadline:getData?.taskDeadline || "",
-      taskDuration:getData?.taskDuration || "",
-    }
-  )
-
-  setInputAutoDetails(
-    {
-      team: getData?.team||"",
-      priority: getData?.priority||"normal",
-      status: getData?.status||"new",
-      assignedTo: getData?.assignedTo||"",
-      description: getData?.description||"",
-    }
-  )
-},[getData])
+  // useEffect(()=>{
+  //   setInputDetails(
+  //     {
+  //       name: getData?.name|| "",
+  //       taskDate:getData?.taskDate || today,
+  //       taskDeadline:getData?.taskDeadline || "",
+  //       taskDuration:getData?.taskDuration || "",
+  //       team: getData.team?.name||"",
+  //       priority: getData?.priority||"normal",
+  //       status: getData?.status||"new",
+  //       assignedTo: getData.assignedTo?.fullName||"",
+  //       description: getData?.description||"",
+  //     }
+  //   )
+  // },[])
 
 
   const handleBack = () => {
     setBack(true);
   };
-
+console.log(getData)
   return (
     <>
       {back ? (
@@ -216,7 +186,7 @@ useEffect(()=>{
                 style={{ height: "16px" }}
                 onChange={handleChange}
                 name="name"
-                value={inputDetails.name||getData?.name}
+                value={inputDetails.name||getData?.name|| ""}
               />
             </FormControl>
             <FormControl className="teamInput" variant="standard">
@@ -229,11 +199,17 @@ useEffect(()=>{
                   return teams[i].name
                 })}
                 name="team"
-                value={inputAutoDetails.team}
+                value={inputDetails?.team?.name||getData?.team?.name||  ""}
                 onChange={(event, newValue) => {
-                  setInputAutoDetails((x) => {
-                    return { ...x, team: newValue };
-                  });
+                  let formattedValue=teamsData.find((v)=>
+                    v.name===newValue
+                  )
+                  setInputDetails((prev)=>({...prev,team:formattedValue}))
+
+                  // setInputAutoDetails((x) => {
+                  //   return { ...x, team: newValue };
+                  // });
+                  
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -250,7 +226,7 @@ useEffect(()=>{
                 className="auto"
                 id="tags-standard"
                 options={priority}
-                value={inputAutoDetails.priority}
+                value={inputDetails.priority||getData?.priority|| "normal"}
                 getOptionLabel={(option) =>
                   typeof priorityLabel[priority.indexOf(option)] === "string" ||
                   priorityLabel[priority.indexOf(option)] instanceof String
@@ -260,7 +236,7 @@ useEffect(()=>{
                 defaultValue={"normal"}
                
                 onChange={(event, newValue) => {
-                  setInputAutoDetails((x) => {
+                  setInputDetails((x) => {
                     return { ...x, priority: newValue };
                   });
                 }}
@@ -275,7 +251,7 @@ useEffect(()=>{
                 className="auto"
                 id="tags-standard status"
                 options={status}
-                value={inputAutoDetails.status}
+                value={inputDetails.status ||getData?.status|| "new"}
                 getOptionLabel={(option) =>
                   typeof statusLabel[status.indexOf(option)] === "string" ||
                   statusLabel[status.indexOf(option)] instanceof String
@@ -284,7 +260,7 @@ useEffect(()=>{
                 }
                 defaultValue={"new"}
                 onChange={(event, newValue) => {
-                  setInputAutoDetails((x) => {
+                  setInputDetails((x) => {
                     return { ...x, status: newValue };
                   });
                 }}
@@ -308,7 +284,7 @@ useEffect(()=>{
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDeadline || getData?.taskDeadline || null}
+                value={inputDetails.taskDeadline || getData?.taskDeadline || ""}
                 name="taskDeadline"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -318,7 +294,7 @@ useEffect(()=>{
               <Input
                 type="number"
                 onChange={handleChange}
-                value={inputDetails.taskDuration || getData?.taskDuration || null}
+                value={inputDetails.taskDuration || getData?.taskDuration || ""}
                 name="taskDuration"
                 style={{ height: "16px" }}
               ></Input>
@@ -329,14 +305,22 @@ useEffect(()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={assignOption}
+                options={assignTo.map((x,i)=>{
+                  return assignTo[i].fullName
+                })}
                 name="assignedTo"
-                value={inputAutoDetails.assignedTo}
+                value={inputDetails?.assignedTo?.fullName||getData?.assignedTo?.fullName|| "" }
                 
                 onChange={(event, newValue) => {
-                  setInputAutoDetails((x) => {
-                    return { ...x, assignedTo: newValue };
-                  });
+                  let formattedValue=assignTo.find((v)=>
+                    v.fullName===newValue
+                  )
+                  setInputDetails((prev)=>({...prev,assignedTo:formattedValue}))
+
+                  // setInputAutoDetails((x) => {
+                  //   return { ...x, team: newValue };
+                  // });
+                  
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -353,9 +337,9 @@ useEffect(()=>{
               className="text-area"
               name="description"
               style={{ height: "300px" }}
-              value={inputAutoDetails.description}
+              value={inputDetails.description || getData?.description || ""}
               onChange={(e) => {
-                setInputAutoDetails((x) => {
+                setInputDetails((x) => {
                   return { ...x, description: e.target.value};
                 });
               }}
