@@ -13,159 +13,99 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import service from "../service";
 import { useEffect } from "react";
 
-import {assignTo,assignData,teamsData,priority,priorityLabel,status,statusLabel} from "../../src/test"
+import {
+  assignTo,
+  teamsData,
+  priority,
+  priorityLabel,
+  status,
+  statusLabel,
+} from "../../src/test";
 
 export default function Form(props) {
-  const { getData,getEditData } = props;
-
-  
-  
-// const editData = {
-//   name: getData.name,
-//     taskDate:getData.taskDate,
-//     taskDeadline:getData.taskDeadline,
-//     taskDuration:getData.taskDuration,
-//     team: getData.team,
-//     priority: getData.priority,
-//     status: getData.status,
-//     assignedTo: getData.assignedTo,
-//     description: getData.description
-// }
-
+  let getData = props.getData;
 
   const [back, setBack] = useState(false);
-  const [edit, setEdit] = useState(true);
+  const [editData, setEditData] = useState();
+  const [edit, setEdit] = useState(false);
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
 
-  const assignOption = assignData.map((x,i,assign)=>{
-    return assign[i].name
-  })
+  const [inputDetails, setInputDetails] = useState({});
 
-const assignCode = assignData.map((x,i,assign)=>{
-  return assign[i].code
-}) 
-
-const assignId = assignData.map((x,i,assign)=>{
-  return assign[i].partner.id
-})
-
-
-  const [inputDetails, setInputDetails] = useState({
-    
-  });
-  const [inputAutoDetails, setInputAutoDetails] = useState({
-    // team: getData?.team||"",
-    // priority: getData?.priority || "normal",
-    
-  });
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInputDetails((x) => {
-      
       return { ...x, [name]: value };
-      
     });
-    
   };
 
-const teamsName = teamsData.map((x,i,team)=>{
-  return team[i].name
-})
-
   const handleSave = () => {
-    
     if (!inputDetails.name) {
     } else {
-      
       const url = "/ws/rest/com.axelor.team.db.TeamTask";
-      
-     
-     
-      
-      
+
       let details = {
         ...inputDetails,
       };
-console.log(inputDetails)
-      if(details.taskDuration==="")
-      {
-        details={
-            ...details,taskDuration:0
-        }
-      }
-      if(details.taskDeadline==="")
-      {
-        details={
-            ...details,taskDeadline:null
-        }
-      }
-      if(details.description===null)
-      {
-        details={
-          ...details,description:""
-        }
-      }
-      
-      if (getData) {
-         
-        const updatedValue={}
-        Object.entries(details).filter((x,i)=>{
-          return x[1]!==getData[x[0]]
-      }).forEach(
-          (x,i)=>{
-              updatedValue[x[0]]=x[1]
-          })
-          
-        const body = {
-          data: { ...getData,...updatedValue},
+      if (details.taskDuration === "") {
+        details = {
+          ...details,
+          taskDuration: 0,
         };
-        const fetchUrl = "/ws/rest/com.axelor.team.db.TeamTask/"+getData.id+"/fetch";
-        service.post(url, body).then(
-          getEditData(fetchUrl)
-          
-        );
-        
+      }
+      if (details.taskDeadline === "") {
+        details = {
+          ...details,
+          taskDeadline: null,
+        };
+      }
+      if (details.description === null) {
+        details = {
+          ...details,
+          description: "",
+        };
+      }
+
+      if (editData || getData) {
+        const updatedValue = {};
+        Object.entries(details)
+          .filter((x, i) => {
+            return x[1] !== editData ? editData[x[0]] : getData[x[0]];
+          })
+          .forEach((x, i) => {
+            updatedValue[x[0]] = x[1];
+          });
+
+        const body = {
+          data: {
+            ...updatedValue,
+            id: editData ? editData.id : getData.id,
+            version: editData ? editData.version : getData.version,
+          },
+        };
+
+        service.post(url, body).then((data) => {
+          setEditData(data.data[0]);
+        });
       } else {
         const body = { data: { ...details } };
-        service.post(url, body).then(
-          (data)=>{
-            console.log(data)
-          }
-        );
+        service.post(url, body).then((data) => {
+          getData = null;
+          setEditData(data.data[0]);
+        });
       }
-      
     }
-   
   };
-
-  
-  
-  // useEffect(()=>{
-  //   setInputDetails(
-  //     {
-  //       name: getData?.name|| "",
-  //       taskDate:getData?.taskDate || today,
-  //       taskDeadline:getData?.taskDeadline || "",
-  //       taskDuration:getData?.taskDuration || "",
-  //       team: getData.team?.name||"",
-  //       priority: getData?.priority||"normal",
-  //       status: getData?.status||"new",
-  //       assignedTo: getData.assignedTo?.fullName||"",
-  //       description: getData?.description||"",
-  //     }
-  //   )
-  // },[])
-
 
   const handleBack = () => {
     setBack(true);
   };
-console.log(getData)
+
   return (
     <>
       {back ? (
-        <Task handleAdd={props.handleAdd} />
+        <Task />
       ) : (
         <div className="form-conatiner">
           <div className="form-button-container">
@@ -186,7 +126,7 @@ console.log(getData)
                 style={{ height: "16px" }}
                 onChange={handleChange}
                 name="name"
-                value={inputDetails.name||getData?.name|| ""}
+                value={inputDetails.name || getData?.name || ""}
               />
             </FormControl>
             <FormControl className="teamInput" variant="standard">
@@ -195,21 +135,19 @@ console.log(getData)
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={teamsData.map((x,i,teams)=>{
-                  return teams[i].name
+                options={teamsData.map((x, i, teams) => {
+                  return teams[i].name;
                 })}
                 name="team"
-                value={inputDetails?.team?.name||getData?.team?.name||  ""}
+                value={inputDetails?.team?.name || getData?.team?.name || ""}
                 onChange={(event, newValue) => {
-                  let formattedValue=teamsData.find((v)=>
-                    v.name===newValue
-                  )
-                  setInputDetails((prev)=>({...prev,team:formattedValue}))
-
-                  // setInputAutoDetails((x) => {
-                  //   return { ...x, team: newValue };
-                  // });
-                  
+                  let formattedValue = teamsData.find(
+                    (v) => v.name === newValue
+                  );
+                  setInputDetails((prev) => ({
+                    ...prev,
+                    team: formattedValue,
+                  }));
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -226,7 +164,7 @@ console.log(getData)
                 className="auto"
                 id="tags-standard"
                 options={priority}
-                value={inputDetails.priority||getData?.priority|| "normal"}
+                value={inputDetails.priority || getData?.priority || "Normal"}
                 getOptionLabel={(option) =>
                   typeof priorityLabel[priority.indexOf(option)] === "string" ||
                   priorityLabel[priority.indexOf(option)] instanceof String
@@ -234,7 +172,6 @@ console.log(getData)
                     : "Normal"
                 }
                 defaultValue={"normal"}
-               
                 onChange={(event, newValue) => {
                   setInputDetails((x) => {
                     return { ...x, priority: newValue };
@@ -251,7 +188,7 @@ console.log(getData)
                 className="auto"
                 id="tags-standard status"
                 options={status}
-                value={inputDetails.status ||getData?.status|| "new"}
+                value={inputDetails.status || getData?.status || "New"}
                 getOptionLabel={(option) =>
                   typeof statusLabel[status.indexOf(option)] === "string" ||
                   statusLabel[status.indexOf(option)] instanceof String
@@ -274,7 +211,7 @@ console.log(getData)
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDate|| getData?.taskDate || today}
+                value={inputDetails.taskDate || getData?.taskDate || today}
                 name="taskDate"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -305,22 +242,27 @@ console.log(getData)
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={assignTo.map((x,i)=>{
-                  return assignTo[i].fullName
+                options={assignTo.map((x, i) => {
+                  return assignTo[i].fullName;
                 })}
                 name="assignedTo"
-                value={inputDetails?.assignedTo?.fullName||getData?.assignedTo?.fullName|| "" }
-                
+                value={
+                  inputDetails?.assignedTo?.fullName ||
+                  getData?.assignedTo?.fullName ||
+                  ""
+                }
                 onChange={(event, newValue) => {
-                  let formattedValue=assignTo.find((v)=>
-                    v.fullName===newValue
-                  )
-                  setInputDetails((prev)=>({...prev,assignedTo:formattedValue}))
+                  let formattedValue = assignTo.find(
+                    (v) => v.fullName === newValue
+                  );
+                  setInputDetails((prev) => ({
+                    ...prev,
+                    assignedTo: formattedValue,
+                  }));
 
                   // setInputAutoDetails((x) => {
                   //   return { ...x, team: newValue };
                   // });
-                  
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -340,7 +282,7 @@ console.log(getData)
               value={inputDetails.description || getData?.description || ""}
               onChange={(e) => {
                 setInputDetails((x) => {
-                  return { ...x, description: e.target.value};
+                  return { ...x, description: e.target.value };
                 });
               }}
             ></TextareaAutosize>

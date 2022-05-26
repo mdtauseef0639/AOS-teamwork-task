@@ -66,7 +66,7 @@ export default function Task() {
     });
  }
   
-console.log(clickedData)
+
   const handleClick = (e) => {
     setEntryClicked(true);
     
