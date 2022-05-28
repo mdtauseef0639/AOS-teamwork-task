@@ -5,8 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import service from "../service";
 import Form from "./Form";
-
-
+import { priority, priorityLabel, status, statusLabel } from "../test";
 
 const columns = [
   {
@@ -53,23 +52,22 @@ export default function Task() {
   const handleDoubleClick = (e) => {
     setEntryClicked(true);
     setEdit(true);
-    const url = "/ws/rest/com.axelor.team.db.TeamTask/"+e["row"].id+"/fetch";
-    getEditData(url)
+    const url =
+      "/ws/rest/com.axelor.team.db.TeamTask/" + e["row"].id + "/fetch";
+    getEditData(url);
   };
- 
 
- const getEditData = (url)=>{
+  const getEditData = (url) => {
     service.post(url).then((data) => {
-      const fetchData = data.data[0]
-    
-      setClickedData(fetchData)
+      const fetchData = data.data[0];
+
+      setClickedData(fetchData);
     });
- }
-  
+  };
 
   const handleClick = (e) => {
     setEntryClicked(true);
-    
+
     setClickedData(e);
   };
 
@@ -80,34 +78,31 @@ export default function Task() {
     setRefresh(refresh + 1);
   };
 
-  const rows = (data|| []).map((x) => {
-    if(x.team===null)
-    {
+  const rows = (data || []).map((x) => {
+    if (x.team === null) {
       return {
         id: x.id,
         name: x.name,
         team: "",
         taskDate: x.taskDate,
-        status: x.status,
-        priority: x.priority,
-      }
-    }
-    else{
+        status: statusLabel[status.indexOf(x.status)],
+        priority: priorityLabel[priority.indexOf(x.priority)],
+      };
+    } else {
       return {
         id: x.id,
         name: x.name,
         team: x.team.name,
         taskDate: x.taskDate,
-        status: x.status,
-        priority: x.priority,
-      }
+        status: statusLabel[status.indexOf(x.status)],
+        priority: priorityLabel[priority.indexOf(x.priority)],
+      };
     }
   });
 
   useEffect(() => {
     const url = "ws/rest/com.axelor.team.db.TeamTask/search";
     service.post(url).then((data) => {
-
       setData(data.data);
     });
   }, []);
@@ -121,7 +116,12 @@ export default function Task() {
   return add ? (
     <Form />
   ) : edit ? (
-    <Form getData={clickedData} edit={entryClicked} editId={clickedData.id} getEditData={getEditData} />
+    <Form
+      getData={clickedData}
+      edit={entryClicked}
+      editId={clickedData.id}
+      getEditData={getEditData}
+    />
   ) : (
     <div className="task-container">
       <div className="task-button-container">
@@ -150,9 +150,8 @@ export default function Task() {
               {
                 display: "none",
               },
-              
           }}
-          rows={rows|| [""]}
+          rows={rows || [""]}
           onRowDoubleClick={handleDoubleClick}
           onRowClick={handleClick}
           columns={columns}

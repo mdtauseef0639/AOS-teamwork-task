@@ -11,7 +11,6 @@ import Task from "./Task";
 
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import service from "../service";
-import { useEffect } from "react";
 
 import {
   assignTo,
@@ -23,15 +22,22 @@ import {
 } from "../../src/test";
 
 export default function Form(props) {
-  let getData = props.getData;
+  const { getData } = props;
 
   const [back, setBack] = useState(false);
-  const [editData, setEditData] = useState();
-  const [edit, setEdit] = useState(false);
+
+  const [currData, setCurrData] = useState();
+  const [editData, setEditData] = useState(getData);
+
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
 
-  const [inputDetails, setInputDetails] = useState({});
+  const [inputDetails, setInputDetails] = useState({
+    taskDuration: 0,
+    priority: "normal",
+    status: "new",
+    taskDate: today,
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,11 +73,11 @@ export default function Form(props) {
         };
       }
 
-      if (editData || getData) {
+      if (editData) {
         const updatedValue = {};
         Object.entries(details)
           .filter((x, i) => {
-            return x[1] !== editData ? editData[x[0]] : getData[x[0]];
+            return x[1] !== editData[x[0]];
           })
           .forEach((x, i) => {
             updatedValue[x[0]] = x[1];
@@ -80,19 +86,41 @@ export default function Form(props) {
         const body = {
           data: {
             ...updatedValue,
-            id: editData ? editData.id : getData.id,
-            version: editData ? editData.version : getData.version,
+            id: editData.id,
+            version: editData.version,
           },
         };
 
         service.post(url, body).then((data) => {
-          setEditData(data.data[0]);
+          setCurrData(data.data[0]);
+          setEditData();
+        });
+      } else if (currData) {
+        const updatedValue = {};
+        Object.entries(details)
+          .filter((x, i) => {
+            return x[1] !== currData[x[0]];
+          })
+          .forEach((x, i) => {
+            updatedValue[x[0]] = x[1];
+          });
+
+        const body = {
+          data: {
+            ...updatedValue,
+            id: currData.id,
+            version: currData.version,
+          },
+        };
+
+        service.post(url, body).then((data) => {
+          setCurrData(data.data[0]);
         });
       } else {
         const body = { data: { ...details } };
         service.post(url, body).then((data) => {
-          getData = null;
-          setEditData(data.data[0]);
+          const editData = data.data[0];
+          setCurrData(editData);
         });
       }
     }
@@ -164,7 +192,7 @@ export default function Form(props) {
                 className="auto"
                 id="tags-standard"
                 options={priority}
-                value={inputDetails.priority || getData?.priority || "Normal"}
+                value={inputDetails.priority || getData?.priority || "normal"}
                 getOptionLabel={(option) =>
                   typeof priorityLabel[priority.indexOf(option)] === "string" ||
                   priorityLabel[priority.indexOf(option)] instanceof String
@@ -188,7 +216,7 @@ export default function Form(props) {
                 className="auto"
                 id="tags-standard status"
                 options={status}
-                value={inputDetails.status || getData?.status || "New"}
+                value={inputDetails.status || getData?.status || "new"}
                 getOptionLabel={(option) =>
                   typeof statusLabel[status.indexOf(option)] === "string" ||
                   statusLabel[status.indexOf(option)] instanceof String

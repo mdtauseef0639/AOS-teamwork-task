@@ -32,20 +32,17 @@ export function getHeaders(file, offset) {
   return headers;
 }
 
-
-
 export class Service {
   constructor() {
     const headers = new Headers();
     headers.append("Accept", "application/json");
-    headers.append("Content-Type", "application/json")
+    headers.append("Content-Type", "application/json");
     headers.append("X-Requested-With", "XMLHttpRequest");
-    headers.append("Access-Control-Allow-Headers","*")
-    headers.append("Access-Control-Allow-Methods","*")
-    headers.append("Access-Control-Allow-Credentials",true)
-    headers.append("Access-Control-Allow-Origin","*")
-    headers.append("X-CSRF-Token","a81cf990-a980-402a-8b0c-3cef3397b7a4");
-    // readCookie("CSRF-TOKEN")
+    headers.append("Access-Control-Allow-Headers", "*");
+    headers.append("Access-Control-Allow-Methods", "*");
+    headers.append("Access-Control-Allow-Credentials", true);
+    headers.append("Access-Control-Allow-Origin", "*");
+    headers.append("X-CSRF-Token",readCookie("CSRF-TOKEN") );
     this.baseURL = process.env.NODE_ENV === "production" ? ".." : "axelor-erp";
     this.headers = headers;
   }
@@ -53,8 +50,7 @@ export class Service {
   fetch(url, method, options) {
     return fetch(url, options)
       .then((data) => {
-        if (["head"].indexOf(method.toLowerCase()) !== -1)
-          return data;
+        if (["head"].indexOf(method.toLowerCase()) !== -1) return data;
         let isJSON = data.headers
           .get("content-type")
           .includes("application/json");
@@ -91,11 +87,11 @@ export class Service {
     return this.request(url, config);
   }
 
-  post(url,data){
-      const config ={
-          method:"POST",
-      };
-      return this.request(url,config,data)
+  post(url, data) {
+    const config = {
+      method: "POST",
+    };
+    return this.request(url, config, data);
   }
 }
-  export default new Service();
+export default new Service();
