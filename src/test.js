@@ -51,6 +51,8 @@ const assignData = [
   },
 ];
 
+
+
 const assignTo = assignData.map((x) => {
   return { code: x.code, fullName: x.name, id: x.partner.id };
 });
@@ -93,3 +95,8 @@ export {
   status,
   statusLabel,
 };
+
+
+
+
+

@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Button } from "@mui/material";
+import { Button, Popover } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import service from "../service";
 import Form from "./Form";
 import { priority, priorityLabel, status, statusLabel } from "../test";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import CloseIcon from '@mui/icons-material/Close';
+
 
 const columns = [
   {
@@ -40,21 +48,34 @@ const columns = [
   },
 ];
 
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
 export default function Task() {
   const [data, setData] = useState([]);
   const [entryClicked, setEntryClicked] = useState(false);
   const [clickedData, setClickedData] = useState();
   const [refresh, setRefresh] = useState(0);
 
+  const [open, setOpen] = React.useState(false);
+
   const [add, setAdd] = useState(false);
   const [edit, setEdit] = useState(false);
-
+  const [popup, setPopup] = useState(false);
   const handleDoubleClick = (e) => {
     setEntryClicked(true);
     setEdit(true);
     const url =
       "/ws/rest/com.axelor.team.db.TeamTask/" + e["row"].id + "/fetch";
     getEditData(url);
+  };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const getEditData = (url) => {
@@ -76,7 +97,9 @@ export default function Task() {
     const body = { records: [{ id: clickedData.id }] };
     service.post(url, body);
     setRefresh(refresh + 1);
+    handleClose()
   };
+
 
   const rows = (data || []).map((x) => {
     if (x.team === null) {
@@ -124,6 +147,7 @@ export default function Task() {
     />
   ) : (
     <div className="task-container">
+      
       <div className="task-button-container">
         <Button>
           <AddIcon
@@ -134,10 +158,10 @@ export default function Task() {
           />
         </Button>
 
-        <Button disabled={!entryClicked} variant="text">
+        <Button disabled={!entryClicked} variant="text" onClick={handleClickOpen  } >
           <DeleteIcon
             style={entryClicked ? { color: "black" } : { color: "silver" }}
-            onClick={handleDelete}
+            
           />
         </Button>
       </div>
@@ -160,6 +184,25 @@ export default function Task() {
           multipleSelection={true}
         />
       </div>
+      <Dialog
+        open={open}
+        className="delete-dialog"
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle className="dialog-title"><span>{"Question"}</span><span style={{fontSize:"medium",color:"silver"}}><CloseIcon className="close-button"  onClick={handleClose}></CloseIcon></span></DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+          Do you really want to delete the selected record(s)?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions className="dialog-action">
+          <Button  onClick={handleClose} variant="contained" style={{backgroundColor:"white",color:"black",fontSize:10}}>Disagree</Button>
+          <Button  onClick={handleDelete} variant="contained" style={{fontSize:10}}>Agree</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

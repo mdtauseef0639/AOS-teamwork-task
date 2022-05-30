@@ -69,6 +69,35 @@
     display: flex;
 }
 
+.dialog-title{
+    display: flex;
+    justify-content: space-between;
+}
 
+.close-button:hover{
+    color: rgb(116, 123, 129);
+}
 
+.dialog-action{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.delete-dialog{
+    display: grid;
+}
+    
+
+.alert{
+    display: flex;
+}
+
+.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation6.MuiSnackbarContent-root.css-1eqdgzv-MuiPaper-root-MuiSnackbarContent-root{
+    background-color: rgb(242,222,222);
+    color: rgb(202, 49, 49);
+}
+
+.name-alert-close-button{
+    
+}
 

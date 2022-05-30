@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Children, PureComponent, useState } from "react";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -9,25 +9,32 @@ import FormControl from "@mui/material/FormControl";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Task from "./Task";
 
+
+
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import service from "../service";
 
 import {
-  assignTo,
-  teamsData,
   priority,
   priorityLabel,
   status,
   statusLabel,
 } from "../../src/test";
 
+import Snack from "./Snackbar";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import FieldInfo from "./FieldInfo";
+
 export default function Form(props) {
   const { getData } = props;
-
+const [open,setOpen] = useState(false)
   const [back, setBack] = useState(false);
 
+const [editData,setEditData] = useState(getData)
   const [currData, setCurrData] = useState();
-  const [editData, setEditData] = useState(getData);
+
+  const [assign,setAssign] = useState({})
+  const [team,setTeam] = useState({})
 
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
@@ -36,8 +43,28 @@ export default function Form(props) {
     taskDuration: 0,
     priority: "normal",
     status: "new",
-    taskDate: today,
+    taskDate: "",
   });
+const displayAssignTo =()=>{
+  const url = "/ws/rest/com.axelor.auth.db.User/search"
+  const body={fields:[ "id", "fullName", "partner", "name", "code" ]}
+  
+  service.post(url,body).then((data)=>{
+    setAssign(data.data)
+  })
+}
+
+const displayTeam = ()=>{
+  const url = "ws/rest/com.axelor.team.db.Team/search"
+  const body={fields:[ "id","name", "code"]}
+  
+  service.post(url,body).then((data)=>{
+    setTeam(data.data)
+  })
+}
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,8 +74,7 @@ export default function Form(props) {
   };
 
   const handleSave = () => {
-    if (!inputDetails.name) {
-    } else {
+   if(inputDetails?.name ||getData?.name) {
       const url = "/ws/rest/com.axelor.team.db.TeamTask";
 
       let details = {
@@ -72,12 +98,11 @@ export default function Form(props) {
           description: "",
         };
       }
-
       if (editData) {
         const updatedValue = {};
         Object.entries(details)
           .filter((x, i) => {
-            return x[1] !== editData[x[0]];
+            return x[1] !== getData[x[0]];
           })
           .forEach((x, i) => {
             updatedValue[x[0]] = x[1];
@@ -86,8 +111,8 @@ export default function Form(props) {
         const body = {
           data: {
             ...updatedValue,
-            id: editData.id,
-            version: editData.version,
+            id: getData.id,
+            version: getData.version,
           },
         };
 
@@ -114,22 +139,55 @@ export default function Form(props) {
         };
 
         service.post(url, body).then((data) => {
-          setCurrData(data.data[0]);
+          setCurrData(data.data[0])
+          
         });
       } else {
         const body = { data: { ...details } };
         service.post(url, body).then((data) => {
-          const editData = data.data[0];
-          setCurrData(editData);
-        });
+          setCurrData(data.data[0]);
+          
+          
+        })
+        
       }
+      
     }
+    else{
+      setOpen(true)
+    }
+    
   };
+
+  
 
   const handleBack = () => {
     setBack(true);
   };
 
+  
+  const controlledValue = (propertyName, defaultValue) =>
+    Object.keys(inputDetails).includes(propertyName) &&
+    inputDetails[propertyName] !== ""
+      ? inputDetails[propertyName]
+      : Object.keys(getData?getData:{}).includes(propertyName) &&
+        getData[propertyName] !== null &&
+        inputDetails[propertyName] !== ""
+      ? getData[propertyName]
+      : defaultValue
+
+
+      const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setOpen(false);
+      };
+      const handleFocus=(e)=>{
+        console.log(e)
+      }
+     
   return (
     <>
       {back ? (
@@ -146,15 +204,20 @@ export default function Form(props) {
           </div>
           <form action="" method="post" className="form">
             <FormControl error variant="standard">
-              <FormLabel htmlFor="component-error" id="name-label">
+              
+              <FormLabel htmlFor="component-error" id="name-label" onMous={handleFocus}>
                 Name
-              </FormLabel>
+              </FormLabel>  
               <Input
                 id="component-error"
                 style={{ height: "16px" }}
                 onChange={handleChange}
                 name="name"
-                value={inputDetails.name || getData?.name || ""}
+                // value={inputDetails.name || getData?.name || ""}
+                value={ 
+                  
+                  controlledValue("name","")}
+                
               />
             </FormControl>
             <FormControl className="teamInput" variant="standard">
@@ -163,13 +226,13 @@ export default function Form(props) {
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={teamsData.map((x, i, teams) => {
-                  return teams[i].name;
+                options={Object.entries(team).map((x,i)=>{
+                  return x[1].name
                 })}
                 name="team"
                 value={inputDetails?.team?.name || getData?.team?.name || ""}
                 onChange={(event, newValue) => {
-                  let formattedValue = teamsData.find(
+                  let formattedValue = team.find(
                     (v) => v.name === newValue
                   );
                   setInputDetails((prev) => ({
@@ -179,6 +242,7 @@ export default function Form(props) {
                 }}
                 renderInput={(params) => (
                   <TextField
+                  onSelect={displayTeam}
                     {...params}
                     variant="standard"
                     placeholder="Search..."
@@ -192,7 +256,7 @@ export default function Form(props) {
                 className="auto"
                 id="tags-standard"
                 options={priority}
-                value={inputDetails.priority || getData?.priority || "normal"}
+                value={inputDetails?.priority || getData?.priority || "normal"}
                 getOptionLabel={(option) =>
                   typeof priorityLabel[priority.indexOf(option)] === "string" ||
                   priorityLabel[priority.indexOf(option)] instanceof String
@@ -200,6 +264,9 @@ export default function Form(props) {
                     : "Normal"
                 }
                 defaultValue={"normal"}
+
+                
+                
                 onChange={(event, newValue) => {
                   setInputDetails((x) => {
                     return { ...x, priority: newValue };
@@ -216,7 +283,7 @@ export default function Form(props) {
                 className="auto"
                 id="tags-standard status"
                 options={status}
-                value={inputDetails.status || getData?.status || "new"}
+                value={inputDetails?.status || getData?.status || "new"}
                 getOptionLabel={(option) =>
                   typeof statusLabel[status.indexOf(option)] === "string" ||
                   statusLabel[status.indexOf(option)] instanceof String
@@ -270,33 +337,32 @@ export default function Form(props) {
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={assignTo.map((x, i) => {
-                  return assignTo[i].fullName;
+                options={Object.entries(assign).map((x,i)=>{
+                  return x[1].name
                 })}
                 name="assignedTo"
                 value={
-                  inputDetails?.assignedTo?.fullName ||
+                  inputDetails.assignedTo?.fullName ||
                   getData?.assignedTo?.fullName ||
                   ""
                 }
+                onClick={displayAssignTo}
                 onChange={(event, newValue) => {
-                  let formattedValue = assignTo.find(
+                  let formattedValue = assign.find(
                     (v) => v.fullName === newValue
                   );
                   setInputDetails((prev) => ({
                     ...prev,
                     assignedTo: formattedValue,
                   }));
-
-                  // setInputAutoDetails((x) => {
-                  //   return { ...x, team: newValue };
-                  // });
+                  
                 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     variant="standard"
                     placeholder="Search..."
+                    onClick={displayAssignTo}
                   />
                 )}
               />
@@ -315,6 +381,9 @@ export default function Form(props) {
               }}
             ></TextareaAutosize>
           </form>
+          <Snack message={<div><p style={{fontSize:"16.25px"}}>
+<b>The following fields are invalid:</b></p><ul><li style={{fontSize:"13px"}}>Name</li></ul></div>} handleOpen={open} handleClose={handleClose}/>
+              
         </div>
       )}
     </>
