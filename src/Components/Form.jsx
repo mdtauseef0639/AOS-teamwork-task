@@ -33,8 +33,8 @@ const [open,setOpen] = useState(false)
 const [editData,setEditData] = useState(getData)
   const [currData, setCurrData] = useState();
 
-  const [assign,setAssign] = useState({})
-  const [team,setTeam] = useState({})
+  const [users,setUsers] = useState([])
+  const [teams,setTeams] = useState([])
 
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
@@ -50,7 +50,7 @@ const displayAssignTo =()=>{
   const body={fields:[ "id", "fullName", "partner", "name", "code" ]}
   
   service.post(url,body).then((data)=>{
-    setAssign(data.data)
+    setUsers(data.data)
   })
 }
 
@@ -59,10 +59,9 @@ const displayTeam = ()=>{
   const body={fields:[ "id","name", "code"]}
   
   service.post(url,body).then((data)=>{
-    setTeam(data.data)
+    setTeams(data.data)
   })
 }
-
 
 
 
@@ -185,7 +184,7 @@ const displayTeam = ()=>{
         setOpen(false);
       };
       const handleFocus=(e)=>{
-        console.log(e)
+        
       }
      
   return (
@@ -226,13 +225,13 @@ const displayTeam = ()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={Object.entries(team).map((x,i)=>{
-                  return x[1].name
+                options={teams.map((x,i)=>{
+                  return x.name
                 })}
                 name="team"
                 value={inputDetails?.team?.name || getData?.team?.name || ""}
                 onChange={(event, newValue) => {
-                  let formattedValue = team.find(
+                  let formattedValue = teams.find(
                     (v) => v.name === newValue
                   );
                   setInputDetails((prev) => ({
@@ -337,8 +336,8 @@ const displayTeam = ()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={Object.entries(assign).map((x,i)=>{
-                  return x[1].name
+                options={users.map((x,i)=>{
+                  return x.name
                 })}
                 name="assignedTo"
                 value={
@@ -348,7 +347,7 @@ const displayTeam = ()=>{
                 }
                 onClick={displayAssignTo}
                 onChange={(event, newValue) => {
-                  let formattedValue = assign.find(
+                  let formattedValue = users.find(
                     (v) => v.fullName === newValue
                   );
                   setInputDetails((prev) => ({
