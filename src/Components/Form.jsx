@@ -21,9 +21,9 @@ import {
   statusLabel,
 } from "../../src/test";
 
-import Snack from "./Snackbar";
+
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import FieldInfo from "./FieldInfo";
+
 
 export default function Form(props) {
   const { getData } = props;
@@ -381,9 +381,7 @@ const displayTeam = ()=>{
               }}
             ></TextareaAutosize>
           </form>
-          <Snack message={<div><p style={{fontSize:"16.25px"}}>
-<b>The following fields are invalid:</b></p><ul><li style={{fontSize:"13px"}}>Name</li></ul></div>} handleOpen={open} handleClose={handleClose}/>
-              
+         
         </div>
       )}
     </>
