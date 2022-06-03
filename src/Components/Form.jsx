@@ -186,6 +186,8 @@ const displayTeam = ()=>{
       const handleFocus=(e)=>{
         
       }
+      
+      
      
   return (
     <>
@@ -204,7 +206,7 @@ const displayTeam = ()=>{
           <form action="" method="post" className="form">
             <FormControl error variant="standard">
               
-              <FormLabel htmlFor="component-error" id="name-label" onMous={handleFocus}>
+              <FormLabel htmlFor="component-error" id="name-label">
                 Name
               </FormLabel>  
               <Input
@@ -225,7 +227,7 @@ const displayTeam = ()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={teams.map((x,i)=>{
+                options={teams.map((x)=>{
                   return x.name
                 })}
                 name="team"
@@ -336,36 +338,34 @@ const displayTeam = ()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={users.map((x,i)=>{
-                  return x.name
-                })}
-                name="assignedTo"
-                value={
-                  inputDetails.assignedTo?.fullName ||
-                  getData?.assignedTo?.fullName ||
-                  ""
+                options={users}
+                getOptionLabel={(options) =>
+                  typeof options.fullName === "string" ||
+                  options.fullName instanceof String
+                    ? options.fullName
+                    : ""
                 }
-                onClick={displayAssignTo}
+                name="assignedTo"
+                value={getData.assignedTo ||inputDetails.assignedTo ||   ""}
                 onChange={(event, newValue) => {
-                  let formattedValue = users.find(
-                    (v) => v.fullName === newValue
-                  );
+                  
                   setInputDetails((prev) => ({
                     ...prev,
-                    assignedTo: formattedValue,
+                    assignedTo: newValue,
                   }));
-                  
                 }}
                 renderInput={(params) => (
                   <TextField
+                  onSelect={displayAssignTo}
                     {...params}
                     variant="standard"
                     placeholder="Search..."
-                    onClick={displayAssignTo}
                   />
                 )}
               />
             </FormControl>
+
+            
             <FormLabel>Description</FormLabel>
 
             <TextareaAutosize
