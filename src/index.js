@@ -6,11 +6,17 @@ import App from "./Components/App";
 import reportWebVitals from "./reportWebVitals";
 import Task from "./Components/Task";
 import Form from "./Components/Form";
+import { HashRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <App />
+    <HashRouter>
+      <Routes>
+        <Route path="/form/:id" element={<Form />}/>
+        <Route path="/" element={<Task/>} />
+      </Routes>
+    </HashRouter>
   </StrictMode>
 );
 

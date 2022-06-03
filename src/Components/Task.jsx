@@ -13,6 +13,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import CloseIcon from '@mui/icons-material/Close';
+import {useNavigate} from "react-router-dom"
 
 
 const columns = [
@@ -57,7 +58,7 @@ export default function Task() {
   const [entryClicked, setEntryClicked] = useState(false);
   const [clickedData, setClickedData] = useState();
   const [refresh, setRefresh] = useState(0);
-
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const [add, setAdd] = useState(false);
@@ -136,16 +137,7 @@ export default function Task() {
       setData(data.data);
     });
   }, [refresh]);
-  return add ? (
-    <Form />
-  ) : edit ? (
-    <Form
-      getData={clickedData}
-      edit={entryClicked}
-      editId={clickedData.id}
-      getEditData={getEditData}
-    />
-  ) : (
+  return  (
     <div className="task-container">
       
       <div className="task-button-container">
@@ -153,7 +145,7 @@ export default function Task() {
           <AddIcon
             style={{ color: "black" }}
             onClick={() => {
-              setAdd(true);
+              navigate("/form/new")
             }}
           />
         </Button>
@@ -176,7 +168,9 @@ export default function Task() {
               },
           }}
           rows={rows || [""]}
-          onRowDoubleClick={handleDoubleClick}
+          onRowDoubleClick={(e)=>{
+            navigate("/form/"+e['row'].id)
+          }}
           onRowClick={handleClick}
           columns={columns}
           pageSize={5}

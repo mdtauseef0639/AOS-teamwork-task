@@ -1,4 +1,4 @@
-import React, { Children, PureComponent, useState } from "react";
+import React, { Children, PureComponent, useEffect, useState } from "react";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -8,7 +8,7 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Task from "./Task";
-
+import { useNavigate,useParams } from "react-router-dom";
 
 
 import TextareaAutosize from "@mui/material/TextareaAutosize";
@@ -24,17 +24,20 @@ import {
 
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
-
 export default function Form(props) {
-  const { getData } = props;
+  const[getData,setGetData] = useState()
+
 const [open,setOpen] = useState(false)
   const [back, setBack] = useState(false);
-
+const {id} =useParams()
+console.log(id)
 const [editData,setEditData] = useState(getData)
   const [currData, setCurrData] = useState();
 
   const [users,setUsers] = useState([])
   const [teams,setTeams] = useState([])
+
+  const navigate = useNavigate()
 
   const d = new Date();
   const today = d.getFullYear() + "-" + "0" + d.getMonth() + "-" + d.getDate();
@@ -187,17 +190,22 @@ const displayTeam = ()=>{
         
       }
       
-      
+      useEffect(()=>{
+        if(id){const url =
+      "/ws/rest/com.axelor.team.db.TeamTask/" + id + "/fetch";
+      service.post(url).then((data)=>{
+        setGetData(data.data[0])
+      })}
+      },[])
      
   return (
-    <>
-      {back ? (
-        <Task />
-      ) : (
+    
         <div className="form-conatiner">
           <div className="form-button-container">
             <Button variant="text">
-              <ArrowBackIcon style={{ color: "black" }} onClick={handleBack} />
+              <ArrowBackIcon style={{ color: "black" }} onClick={()=>{
+                navigate("..")
+              }} />
             </Button>
             <Button variant="text">
               <SaveIcon style={{ color: "black" }} onClick={handleSave} />
@@ -346,7 +354,7 @@ const displayTeam = ()=>{
                     : ""
                 }
                 name="assignedTo"
-                value={getData.assignedTo ||inputDetails.assignedTo ||   ""}
+                value={getData?.assignedTo ||inputDetails?.assignedTo ||   ""}
                 onChange={(event, newValue) => {
                   
                   setInputDetails((prev) => ({
@@ -382,7 +390,6 @@ const displayTeam = ()=>{
           </form>
          
         </div>
-      )}
-    </>
+     
   );
 }
