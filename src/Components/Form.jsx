@@ -25,13 +25,12 @@ import {
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export default function Form(props) {
-  const[getData,setGetData] = useState()
+  const[editData,setEditData] = useState()
 
 const [open,setOpen] = useState(false)
-  const [back, setBack] = useState(false);
+ 
 const {id} =useParams()
-console.log(id)
-const [editData,setEditData] = useState(getData)
+
   const [currData, setCurrData] = useState();
 
   const [users,setUsers] = useState([])
@@ -76,7 +75,7 @@ const displayTeam = ()=>{
   };
 
   const handleSave = () => {
-   if(inputDetails?.name ||getData?.name) {
+   if(inputDetails?.name ||editData?.name) {
       const url = "/ws/rest/com.axelor.team.db.TeamTask";
 
       let details = {
@@ -104,7 +103,7 @@ const displayTeam = ()=>{
         const updatedValue = {};
         Object.entries(details)
           .filter((x, i) => {
-            return x[1] !== getData[x[0]];
+            return x[1] !== editData[x[0]];
           })
           .forEach((x, i) => {
             updatedValue[x[0]] = x[1];
@@ -113,8 +112,8 @@ const displayTeam = ()=>{
         const body = {
           data: {
             ...updatedValue,
-            id: getData.id,
-            version: getData.version,
+            id: editData.id,
+            version: editData.version,
           },
         };
 
@@ -163,19 +162,17 @@ const displayTeam = ()=>{
 
   
 
-  const handleBack = () => {
-    setBack(true);
-  };
+
 
   
   const controlledValue = (propertyName, defaultValue) =>
     Object.keys(inputDetails).includes(propertyName) &&
     inputDetails[propertyName] !== ""
       ? inputDetails[propertyName]
-      : Object.keys(getData?getData:{}).includes(propertyName) &&
-        getData[propertyName] !== null &&
+      : Object.keys(editData?editData:{}).includes(propertyName) &&
+        editData[propertyName] !== null &&
         inputDetails[propertyName] !== ""
-      ? getData[propertyName]
+      ? editData[propertyName]
       : defaultValue
 
 
@@ -186,20 +183,17 @@ const displayTeam = ()=>{
     
         setOpen(false);
       };
-      const handleFocus=(e)=>{
-        
-      }
-      
+     
       useEffect(()=>{
         if(id){const url =
       "/ws/rest/com.axelor.team.db.TeamTask/" + id + "/fetch";
       service.post(url).then((data)=>{
-        setGetData(data.data[0])
+        setEditData(data.data[0])
       })}
-      },[])
+      },[id])
      
   return (
-    
+    <div className="Container">
         <div className="form-conatiner">
           <div className="form-button-container">
             <Button variant="text">
@@ -222,7 +216,7 @@ const displayTeam = ()=>{
                 style={{ height: "16px" }}
                 onChange={handleChange}
                 name="name"
-                // value={inputDetails.name || getData?.name || ""}
+                // value={inputDetails.name || editData?.name || ""}
                 value={ 
                   
                   controlledValue("name","")}
@@ -239,7 +233,7 @@ const displayTeam = ()=>{
                   return x.name
                 })}
                 name="team"
-                value={inputDetails?.team?.name || getData?.team?.name || ""}
+                value={inputDetails?.team?.name || editData?.team?.name || ""}
                 onChange={(event, newValue) => {
                   let formattedValue = teams.find(
                     (v) => v.name === newValue
@@ -265,7 +259,7 @@ const displayTeam = ()=>{
                 className="auto"
                 id="tags-standard"
                 options={priority}
-                value={inputDetails?.priority || getData?.priority || "normal"}
+                value={inputDetails?.priority || editData?.priority || "normal"}
                 getOptionLabel={(option) =>
                   typeof priorityLabel[priority.indexOf(option)] === "string" ||
                   priorityLabel[priority.indexOf(option)] instanceof String
@@ -292,7 +286,7 @@ const displayTeam = ()=>{
                 className="auto"
                 id="tags-standard status"
                 options={status}
-                value={inputDetails?.status || getData?.status || "new"}
+                value={inputDetails?.status || editData?.status || "new"}
                 getOptionLabel={(option) =>
                   typeof statusLabel[status.indexOf(option)] === "string" ||
                   statusLabel[status.indexOf(option)] instanceof String
@@ -315,7 +309,7 @@ const displayTeam = ()=>{
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDate || getData?.taskDate || today}
+                value={inputDetails.taskDate || editData?.taskDate || today}
                 name="taskDate"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -325,7 +319,7 @@ const displayTeam = ()=>{
               <Input
                 type="date"
                 onChange={handleChange}
-                value={inputDetails.taskDeadline || getData?.taskDeadline || ""}
+                value={inputDetails.taskDeadline || editData?.taskDeadline || ""}
                 name="taskDeadline"
                 style={{ height: "16px", paddingBottom: "10px" }}
               ></Input>
@@ -335,7 +329,7 @@ const displayTeam = ()=>{
               <Input
                 type="number"
                 onChange={handleChange}
-                value={inputDetails.taskDuration || getData?.taskDuration || ""}
+                value={inputDetails.taskDuration || editData?.taskDuration || ""}
                 name="taskDuration"
                 style={{ height: "16px" }}
               ></Input>
@@ -354,7 +348,7 @@ const displayTeam = ()=>{
                     : ""
                 }
                 name="assignedTo"
-                value={getData?.assignedTo ||inputDetails?.assignedTo ||   ""}
+                value={editData?.assignedTo ||inputDetails?.assignedTo ||   ""}
                 onChange={(event, newValue) => {
                   
                   setInputDetails((prev) => ({
@@ -380,7 +374,7 @@ const displayTeam = ()=>{
               className="text-area"
               name="description"
               style={{ height: "300px" }}
-              value={inputDetails.description || getData?.description || ""}
+              value={inputDetails.description || editData?.description || ""}
               onChange={(e) => {
                 setInputDetails((x) => {
                   return { ...x, description: e.target.value };
@@ -389,6 +383,7 @@ const displayTeam = ()=>{
             ></TextareaAutosize>
           </form>
          
+        </div>
         </div>
      
   );

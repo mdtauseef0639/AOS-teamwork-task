@@ -138,6 +138,7 @@ export default function Task() {
     });
   }, [refresh]);
   return  (
+    <div className="Container">
     <div className="task-container">
       
       <div className="task-button-container">
@@ -197,6 +198,7 @@ export default function Task() {
           <Button  onClick={handleDelete} variant="contained" style={{fontSize:10}}>Agree</Button>
         </DialogActions>
       </Dialog>
+    </div>
     </div>
   );
 }
