@@ -346,7 +346,7 @@ const displayTeam = ()=>{
                     : ""
                 }
                 name="assignedTo"
-                value={getData.assignedTo ||inputDetails.assignedTo ||   ""}
+                value={getData?.assignedTo || inputDetails.assignedTo ||   ""}
                 onChange={(event, newValue) => {
                   
                   setInputDetails((prev) => ({

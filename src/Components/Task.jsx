@@ -126,14 +126,14 @@ export default function Task() {
   useEffect(() => {
     const url = "ws/rest/com.axelor.team.db.TeamTask/search";
     service.post(url).then((data) => {
-      setData(data.data);
+      setData(data?.data);
     });
   }, []);
 
   useEffect(() => {
     const url = "ws/rest/com.axelor.team.db.TeamTask/search";
     service.post(url).then((data) => {
-      setData(data.data);
+      setData(data?.data);
     });
   }, [refresh]);
   return add ? (
