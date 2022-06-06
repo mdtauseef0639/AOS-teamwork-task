@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Button, Popover } from "@mui/material";
+import { Button} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import service from "../service";
-import Form from "./Form";
 import { priority, priorityLabel, status, statusLabel } from "../test";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -61,16 +60,7 @@ export default function Task() {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
-  const [add, setAdd] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [popup, setPopup] = useState(false);
-  const handleDoubleClick = (e) => {
-    setEntryClicked(true);
-    setEdit(true);
-    const url =
-      "/ws/rest/com.axelor.team.db.TeamTask/" + e["row"].id + "/fetch";
-    getEditData(url);
-  };
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -79,13 +69,6 @@ export default function Task() {
     setOpen(false);
   };
 
-  const getEditData = (url) => {
-    service.post(url).then((data) => {
-      const fetchData = data.data[0];
-
-      setClickedData(fetchData);
-    });
-  };
 
   const handleClick = (e) => {
     setEntryClicked(true);
@@ -146,7 +129,7 @@ export default function Task() {
           <AddIcon
             style={{ color: "black" }}
             onClick={() => {
-              navigate("/form/new")
+              navigate("/form")
             }}
           />
         </Button>

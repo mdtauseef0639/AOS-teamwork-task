@@ -14,6 +14,7 @@ root.render(
     <HashRouter>
       <Routes>
         <Route path="/form/:id" element={<Form />}/>
+        <Route path="/form" element={<Form/>}/>
         <Route path="/" element={<Task/>} />
       </Routes>
     </HashRouter>

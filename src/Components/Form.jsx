@@ -1,4 +1,4 @@
-import React, { Children, PureComponent, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -7,7 +7,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Task from "./Task";
+
 import { useNavigate,useParams } from "react-router-dom";
 
 
@@ -22,7 +22,8 @@ import {
 } from "../../src/test";
 
 
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+
+import Snack from "./Snackbar";
 
 export default function Form(props) {
   const[editData,setEditData] = useState()
@@ -188,7 +189,7 @@ const displayTeam = ()=>{
         if(id){const url =
       "/ws/rest/com.axelor.team.db.TeamTask/" + id + "/fetch";
       service.post(url).then((data)=>{
-        setEditData(data.data[0])
+        setEditData(data?.data[0])
       })}
       },[id])
      
@@ -229,18 +230,19 @@ const displayTeam = ()=>{
                 className="auto"
                 id="size-small-standard"
                 size={"500px"}
-                options={teams.map((x)=>{
-                  return x.name
-                })}
+                options={teams}
+                getOptionLabel={(options) =>
+                  typeof options.name === "string" ||
+                  options.name instanceof String
+                    ? options.name:""
+                }
                 name="team"
-                value={inputDetails?.team?.name || editData?.team?.name || ""}
+                value={inputDetails?.team || editData?.team || ""}
                 onChange={(event, newValue) => {
-                  let formattedValue = teams.find(
-                    (v) => v.name === newValue
-                  );
+                  
                   setInputDetails((prev) => ({
                     ...prev,
-                    team: formattedValue,
+                    team: newValue,
                   }));
                 }}
                 renderInput={(params) => (
@@ -382,7 +384,8 @@ const displayTeam = ()=>{
               }}
             ></TextareaAutosize>
           </form>
-         
+         <Snack message={<><p><b>The following fields are invalid:</b></p>
+         <ul><li>Name</li></ul></>} handleClose={handleClose} handleOpen={open}/>
         </div>
         </div>
      
